@@ -1,14 +1,16 @@
 # 검증 결과
 
-- 검증일: 2026-10-22T13:06:27.912Z
+- 검증일: 2026-10-22T13:15:16.994Z
 - 빌드: Bun / TypeScript strict / Chrome Manifest V3
 - 단위 테스트: 71 pass, 0 fail, 89 assertions
-- Chrome for Testing 실제 확장 설치 통합 테스트: 11 pass
+- Chrome for Testing 실제 확장 설치 통합 테스트: 13 pass
 
 ## 통과한 시나리오
 
+- single-header-title-and-action-order
 - storage-radio-and-layout
 - help-modal-focus-escape-and-backdrop
+- history-modal-focus-escape-backdrop-and-empty-state
 - local-copy
 - incompatible-copy-rejected
 - normalize-with-silent-input
@@ -17,13 +19,13 @@
 - lms-one-click-offscreen-segment-merge-no-studio
 - closed-lecture-rejected
 - untrusted-link-rejected
-- history-list-and-clear
+- history-dialog-and-clear
 
 내보낸 MP4는 네이티브 ffprobe로 길이와 음성 트랙을 확인하고, 네이티브 ffmpeg로 전체 디코딩 검사했습니다. 브라우저 미리보기 재생도 확인했습니다. 기본 LMS 버튼 테스트에서는 별도 작업 탭이 열리지 않는 것을 확인했습니다.
 
 ## 디자인 확인
 
-TDS 공개 blue500 (#3182f6), grey50~grey900 토큰을 사용했습니다. 장식 라벨/배지/히어로/레일과 중복 설명을 제거하고 입력·설정 영역만 그레이로 구분했습니다. 저장 방식은 항상 보이는 라디오 버튼 그룹입니다. 최근 다운로드는 내역이 있을 때만 일반 목록으로 표시하고, 사용법은 오른쪽 위 버튼에서 모달로 엽니다. 모달 닫기/Esc/배경 클릭/포커스 복원, 점선 파일 추가 영역, 옅은 설정 배경 및 select 오른쪽 48px 패딩을 검증했습니다. 390px 모바일 폭에서 가로 넘침이 없는 것을 확인했습니다.
+상단 제목 하나를 `LearningX 영상 다운로더`로 통일하고 기존 30px 제목 스타일을 적용했습니다. 최근 다운로드 버튼을 사용법 왼쪽에 배치하고 두 기능 모두 모달로 제공합니다. 다운로드 기록 빈 상태, 저장 내역, 지우기, 닫기, Esc, 배경 클릭 및 포커스 복원을 검증했습니다. TDS 공개 blue500/grey 색상, 점선 파일 영역, 라디오 저장 방식, select 오른쪽 여백을 유지합니다. 390px 모바일 폭에서도 가로 넘침이 없습니다.
 
 ## 검증 경계
 

@@ -9,8 +9,7 @@ interface QueueItem { id: string; title: string; lecture?: Lecture; file?: File;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 document.querySelector('#app')!.innerHTML = `
   <main>
-    <header class="topbar"><span class="wordmark">LearningX</span><button id="open-help" class="help-button" aria-haspopup="dialog">사용법</button></header>
-    <div class="page-heading"><h1>영상 합치기</h1></div>
+    <header class="topbar"><h1>LearningX 영상 다운로더</h1><div class="header-actions"><button id="open-history" class="help-button" aria-haspopup="dialog" aria-controls="history-dialog">최근 다운로드</button><button id="open-help" class="help-button" aria-haspopup="dialog" aria-controls="help-dialog">사용법</button></div></header>
     <div class="workspace">
       <section class="library" aria-label="영상 목록">
         <div class="source-tabs"><button id="tab-files" class="source-tab active">파일</button><button id="tab-links" class="source-tab">Commons 링크</button></div>
@@ -29,8 +28,8 @@ document.querySelector('#app')!.innerHTML = `
     </div>
     <section id="job" class="job hidden" aria-live="polite"><div class="job-heading"><h2 id="job-phase">준비 중</h2><span id="job-percent"></span></div><p id="job-detail"></p><progress id="progress" max="100"></progress><details><summary>처리 로그</summary><pre id="logs"></pre></details></section>
     <section id="result" class="result hidden"><div class="section-head"><div><h2>미리보기</h2><p id="result-meta"></p></div><button id="save-result" class="button primary">MP4 저장</button></div><video id="preview" controls playsinline preload="metadata"></video></section>
-    <section id="history-section" class="history-section hidden" aria-labelledby="history-title"><div class="section-head"><h2 id="history-title">최근 다운로드</h2><button id="clear-history" class="text-button">기록 지우기</button></div><div id="history"></div></section>
   </main>
+  <dialog id="history-dialog" aria-labelledby="history-title"><div class="dialog-heading"><h2 id="history-title">최근 다운로드</h2><div class="dialog-actions"><button id="clear-history" class="text-button hidden">기록 지우기</button><button id="close-history" class="dialog-close" aria-label="최근 다운로드 닫기" autofocus>×</button></div></div><div id="history" aria-live="polite"></div></dialog>
   <dialog id="help-dialog" aria-labelledby="help-title">
     <div class="dialog-heading"><h2 id="help-title">사용법</h2><button id="close-help" class="dialog-close" aria-label="사용법 닫기" autofocus>×</button></div>
     <div class="dialog-content">
@@ -189,9 +188,9 @@ async function scan() {
   try {await chrome.tabs.sendMessage(tab.id,{type:'LX_SCAN'});await refreshDetected();toast('강의 목록을 새로 확인했어요. 목록에서 필요한 주차를 펼쳐 주세요.');}catch{toast('주차학습 탭을 새로고침한 다음 다시 시도해 주세요.');}
 }
 function renderHistory() {
-  const root=$('history');root.replaceChildren();$('history-section').classList.toggle('hidden',!history.length);
-  if(!history.length)return;
-  for(const h of history.slice(0,5)) {
+  const root=$('history');root.replaceChildren();$('clear-history').classList.toggle('hidden',!history.length);
+  if(!history.length){root.append(element('p','history-empty','아직 다운로드한 영상이 없어요.'));return;}
+  for(const h of history) {
     const row=element('div','history-row');row.append(element('strong','',h.title));
     const label=h.state==='complete'?'저장 완료':h.state==='in_progress'?'다운로드 중':`중단: ${h.state}`;row.append(element('span','video-meta',label));
     if(isExtension){const button=element('button','text-button','폴더 열기');button.onclick=()=>chrome.downloads.show(h.downloadId);row.append(button);}root.append(row);
@@ -216,10 +215,9 @@ dropzone.addEventListener('drop',event=>{event.preventDefault();dropzone.classLi
 for(const name of ['links','files'])$(`tab-${name}`).onclick=()=>{for(const n of ['links','files']){$(`tab-${n}`).classList.toggle('active',n===name);$(`${n}-pane`).classList.toggle('hidden',n!==name);}};
 $<HTMLInputElement>('select-all').onchange=event=>{selected=(event.target as HTMLInputElement).checked?new Set(queue.map(q=>q.id)):new Set();renderQueue();};
 $('clear').onclick=()=>{if(controller)return;queue=[];selected.clear();renderQueue();};
-const helpDialog=$<HTMLDialogElement>('help-dialog');
-$('open-help').onclick=()=>helpDialog.showModal();
-$('close-help').onclick=()=>helpDialog.close();
-helpDialog.addEventListener('click',event=>{if(event.target!==helpDialog)return;const box=helpDialog.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)helpDialog.close();});
+function bindDialog(dialogId:string,openId:string,closeId:string){const dialog=$<HTMLDialogElement>(dialogId);$(openId).onclick=()=>dialog.showModal();$(closeId).onclick=()=>dialog.close();dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const box=dialog.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)dialog.close();});}
+bindDialog('help-dialog','open-help','close-help');
+bindDialog('history-dialog','open-history','close-history');
 $('scan').onclick=()=>void scan();$('start').onclick=()=>void start();$('cancel').onclick=()=>controller?.abort();
 $('merge-mode').onchange=()=>{$('mode-description').textContent=$<HTMLSelectElement>('merge-mode').value==='copy'?'같은 형식의 영상을 재인코딩 없이 연결합니다. 형식이 다르면 호환 모드를 안내해요.':'해상도·프레임·음성을 720p/30fps/AAC로 통일합니다. 무음 영상에는 무음 트랙을 추가하며, 원본 화질이 달라질 수 있어요.';};
 document.querySelectorAll('input[name="output"]').forEach(el=>el.addEventListener('change',updateSelection));

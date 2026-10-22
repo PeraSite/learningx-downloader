@@ -18,13 +18,16 @@ try {
   console.log(`Loaded extension ${id}`);
   const studio=await context.newPage();studio.on('pageerror',error=>errors.push(error.message));
   await studio.goto(`chrome-extension://${id}/studio.html`);
-  await expect(studio.locator('h1')).toContainText('영상 합치기');
+  await expect(studio.locator('header h1')).toHaveText('LearningX 영상 다운로더');
+  await expect(studio.locator('h1')).toHaveCount(1);await expect(studio.locator('.page-heading,.wordmark')).toHaveCount(0);
+  const titleBox=await studio.locator('header h1').boundingBox();const historyBox=await studio.locator('#open-history').boundingBox();const helpBox=await studio.locator('#open-help').boundingBox();if(!titleBox||titleBox.y>80||!historyBox||!helpBox||historyBox.x>=helpBox.x)throw new Error('Header layout incorrect');
+  await expect(studio.locator('header h1')).toHaveCSS('font-size','30px');results.push({test:'single-header-title-and-action-order',passed:true});
   await expect(studio.locator('.rail,.eyebrow,.engine-badge,.badge')).toHaveCount(0);
   await expect(studio.locator('.dropzone')).toHaveCSS('border-top-style','dashed');
   await expect(studio.locator('.settings')).toHaveCSS('background-color','rgb(249, 250, 251)');
   await expect(studio.locator('#merge-mode')).toHaveCSS('padding-right','48px');
   await expect(studio.locator('.output-options')).toHaveJSProperty('tagName','FIELDSET');
-  await expect(studio.locator('#history-section')).toBeHidden();
+  await expect(studio.locator('#history-dialog')).not.toBeVisible();await expect(studio.locator('#history-section')).toHaveCount(0);
   await studio.getByRole('radio',{name:'각각 저장',exact:true}).check();
   await expect(studio.locator('#start')).toHaveText('다운로드');
   await studio.getByRole('radio',{name:'각각 저장',exact:true}).press('ArrowLeft');
@@ -39,6 +42,10 @@ try {
   await studio.locator('#open-help').click();await studio.locator('#close-help').click();await expect(studio.locator('#help-dialog')).not.toBeVisible();
   await studio.locator('#open-help').click();await studio.mouse.click(8,8);await expect(studio.locator('#help-dialog')).not.toBeVisible();
   results.push({test:'help-modal-focus-escape-and-backdrop',passed:true});
+  await studio.locator('#open-history').click();await expect(studio.getByRole('dialog',{name:'최근 다운로드',exact:true})).toBeVisible();await expect(studio.locator('#close-history')).toBeFocused();await expect(studio.locator('#history')).toContainText('아직 다운로드한 영상이 없어요.');await expect(studio.locator('#clear-history')).toBeHidden();
+  await studio.keyboard.press('Escape');await expect(studio.locator('#history-dialog')).not.toBeVisible();await expect(studio.locator('#open-history')).toBeFocused();
+  await studio.locator('#open-history').click();await studio.locator('#close-history').click();await expect(studio.locator('#history-dialog')).not.toBeVisible();
+  await studio.locator('#open-history').click();await studio.mouse.click(8,8);await expect(studio.locator('#history-dialog')).not.toBeVisible();results.push({test:'history-modal-focus-escape-backdrop-and-empty-state',passed:true});
   await studio.screenshot({path:join(out,'studio-minimal.png'),fullPage:true});
   async function clear(){await studio.locator('#clear').click();}
   async function files(paths:string[]){await studio.locator('#tab-files').click();await studio.locator('#files').setInputFiles(paths);}
@@ -51,7 +58,7 @@ try {
     if(Math.abs(Number(meta.format.duration)-seconds)>0.4)throw new Error(`${name}: duration mismatch ${meta.format.duration}`);
     if(!meta.streams.some((s:{codec_type:string})=>s.codec_type==='audio'))throw new Error(`${name}: audio missing`);
     await command([ffmpeg,'-v','error','-xerror','-i',path,'-f','null','-']);
-    await expect(studio.locator('#history-section')).toBeVisible();await expect(studio.locator('#history-section')).toHaveJSProperty('tagName','SECTION');
+    await expect(studio.locator('#history-dialog')).not.toBeVisible();await studio.locator('#open-history').click();await expect(studio.locator('#history-dialog')).toBeVisible();await expect(studio.locator('.history-row').first()).toContainText('저장 완료');await studio.screenshot({path:join(out,'studio-history-'+name+'.png'),fullPage:false});await studio.locator('#close-history').click();
     results.push({test:name,passed:true,path,meta});return path;
   }
   await files([join(out,'clip1.mp4'),join(out,'clip2.mp4')]);
@@ -60,7 +67,7 @@ try {
   await studio.locator('#preview').evaluate(async(v:HTMLVideoElement)=>{v.muted=true;await v.play();});
   await studio.waitForTimeout(500);const played=await studio.locator('#preview').evaluate((v:HTMLVideoElement)=>{v.pause();return v.currentTime>0;});if(!played)throw new Error('Preview did not play');
   await studio.screenshot({path:join(out,'studio-copy.png'),fullPage:true});
-  await studio.setViewportSize({width:390,height:844});await studio.screenshot({path:join(out,'studio-mobile.png'),fullPage:true});await studio.locator('#open-help').click();await studio.screenshot({path:join(out,'studio-help-mobile.png'),fullPage:false});await studio.keyboard.press('Escape');const overflow=await studio.evaluate(()=>document.documentElement.scrollWidth>innerWidth);if(overflow)throw new Error('Mobile horizontal overflow');await studio.setViewportSize({width:1280,height:720});
+  await studio.setViewportSize({width:390,height:844});await studio.screenshot({path:join(out,'studio-mobile.png'),fullPage:true});await studio.locator('#open-help').click();await studio.screenshot({path:join(out,'studio-help-mobile.png'),fullPage:false});await studio.keyboard.press('Escape');await studio.locator('#open-history').click();await studio.screenshot({path:join(out,'studio-history-mobile.png'),fullPage:false});await studio.keyboard.press('Escape');const overflow=await studio.evaluate(()=>document.documentElement.scrollWidth>innerWidth);if(overflow)throw new Error('Mobile horizontal overflow');await studio.setViewportSize({width:1280,height:720});
   await clear();await files([join(out,'clip1.mp4'),join(out,'silent.mp4')]);await studio.locator('#start').click();await waitJob('작업 실패');await expect(studio.locator('#job-detail')).toContainText('호환 모드');results.push({test:'incompatible-copy-rejected',passed:true});
   await studio.locator('#merge-mode').selectOption('normalize');await studio.locator('#output-name').fill('호환 모드 병합');await studio.locator('#start').click();await waitJob('완료',180_000);await exportAndProbe('normalize-with-silent-input',3);
   // Cancellation must kill the wasm worker and leave the UI reusable.
@@ -105,7 +112,7 @@ try {
   const downloadsAfter=await worker.evaluate(async()=> (await chrome.downloads.search({})).length);if(downloadsAfter!==downloadsBefore)throw new Error('Closed lecture downloaded');results.push({test:'closed-lecture-rejected',passed:true});
   await source.screenshot({path:join(out,'lms-one-click.png'),fullPage:true});
   const advanced=await context.newPage();await advanced.goto('chrome-extension://'+id+'/studio.html');await advanced.locator('#clear').click();await advanced.locator('#tab-links').click();await advanced.locator('#links').fill('https://evil.com/em/x');await advanced.locator('#add-links').click();await expect(advanced.locator('.queue-row')).toHaveCount(0);results.push({test:'untrusted-link-rejected',passed:true});
-  await advanced.locator('#clear-history').click();await expect(advanced.locator('#history-section')).toBeHidden();results.push({test:'history-list-and-clear',passed:true});
+  await advanced.locator('#open-history').click();await expect(advanced.locator('#history-dialog')).toBeVisible();await advanced.locator('#clear-history').click();await expect(advanced.locator('#history')).toContainText('아직 다운로드한 영상이 없어요.');await expect(advanced.locator('#clear-history')).toBeHidden();await advanced.locator('#close-history').click();results.push({test:'history-dialog-and-clear',passed:true});
   if(errors.length)throw new Error(`Browser errors: ${errors.join(' | ')}`);
   await Bun.write(join(out,'results.json'),JSON.stringify({passed:true,results,errors},null,2));console.log(JSON.stringify({passed:true,tests:results.map(r=>r.test),out},null,2));
 } catch(error){await Bun.write(join(out,'results.json'),JSON.stringify({passed:false,results,errors,error:String(error)},null,2));for(const p of context.pages())try{if(p.url().includes('/studio.html'))await p.screenshot({path:join(out,'failure.png'),fullPage:true});}catch{}throw error;}finally{await context.close();mediaServer.stop();}

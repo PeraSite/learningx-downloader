@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "LearningX Video Studio",
+  "name": "LearningX 영상 다운로더",
   "version": "0.1.0",
   "description": "허용된 LearningX / Commons 영상을 로컬에 저장하고 ffmpeg.wasm으로 병합합니다.",
   "minimum_chrome_version": "116",
@@ -16,7 +16,7 @@
     "https://ssu-toast.commonscdn.com/*"
   ],
   "action": {
-    "default_title": "영상 합치기"
+    "default_title": "LearningX 영상 다운로더"
   },
   "background": {
     "service_worker": "background.js",
