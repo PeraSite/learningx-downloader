@@ -1,6 +1,7 @@
 import {mkdir,cp,rm} from 'node:fs/promises';
 const manifest=await Bun.file('manifest.json').json();
 await mkdir('release',{recursive:true});
+await cp('docs','dist/docs',{recursive:true});
 for(const name of ['README.md','THIRD_PARTY_NOTICES.md','TEST_REPORT.md'])try{await cp(name,`dist/${name}`);}catch{}
 const path=`release/learningx-video-extension-${manifest.version}.zip`;
 await rm(path,{force:true});

@@ -1,130 +1,139 @@
 # LearningX 영상 다운로더
 
-숭실대 LearningX/Commons 영상을 로컬에 저장하고, **강의 내부 조각 또는 여러 강의를 MP4 한 편으로 이어 붙이는 Chrome Manifest V3 확장**입니다. 계정·영상 처리 서버는 없습니다.
+**강의 옆에서 한 번 클릭. 조각 영상도 MP4 한 편으로.**
 
-## 설치 ZIP 다운로드
+LearningX 강의를 저장하고, 여러 영상을 브라우저 안에서 이어 붙이는 Chrome 확장 프로그램입니다.
+현재 **숭실대학교 LearningX / Commons**를 지원합니다.
 
-저장소의 **Releases → Latest**에서 `learningx-video-extension.zip`을 받으세요. 이 저장소는 비공개이므로 접근 가능한 GitHub 계정으로 로그인해야 합니다.
+[![최신 ZIP 다운로드](https://img.shields.io/badge/최신_ZIP_다운로드-3182f6?style=for-the-badge)](https://github.com/PeraSite/learningx-video-extension/releases/latest/download/learningx-video-extension.zip)
+[![GitHub Release](https://img.shields.io/github/v/release/PeraSite/learningx-video-extension?label=release&color=4e5968&style=flat-square)](https://github.com/PeraSite/learningx-video-extension/releases/latest)
+[![Build](https://github.com/PeraSite/learningx-video-extension/actions/workflows/release.yml/badge.svg)](https://github.com/PeraSite/learningx-video-extension/actions/workflows/release.yml)
 
-1. ZIP 압축을 풉니다.
-2. Chrome의 `chrome://extensions`에서 **개발자 모드 → 압축해제된 확장 프로그램을 로드**를 선택합니다.
-3. `manifest.json`이 있는 압축 해제 폴더를 선택합니다.
-4. LearningX 탭을 새로고침합니다.
+[설치](#설치) · [사용법](#사용법) · [지원 범위](#지원-범위) · [개발 가이드](docs/DEVELOPMENT.md) · [문제 제보](https://github.com/PeraSite/learningx-video-extension/issues)
 
-ZIP 자체를 Chrome에 끌어 넣어 설치하는 방식이나 Chrome Web Store 자동 업데이트는 아닙니다. 업데이트할 때는 기존 확장 폴더의 내용을 새 ZIP 내용으로 교체한 뒤 확장 관리 화면과 LMS 탭을 새로고침하세요.
+![LearningX 영상 다운로더 화면](docs/images/studio.png)
 
-## 푸시 시 자동 릴리스
+## 필요한 기능만, 간단하게
 
-`main`에 푸시하면 GitHub Actions가 잠긴 의존성 설치, 단위 테스트, 빌드 및 실제 Chrome 확장 통합 테스트를 실행합니다. 모든 단계가 성공해야 새 GitHub Release에 설치 ZIP과 `SHA256SUMS.txt`를 올립니다. Actions 탭에서 수동 실행도 가능합니다. 테스트가 실패하면 새 릴리스를 배포하지 않습니다.
+- **LMS에서 바로 저장**: 강의 옆 `다운로드` 버튼을 누르면 별도 작업 화면 없이 저장합니다.
+- **조각 영상 자동 병합**: 나뉜 미디어를 로컬 ffmpeg.wasm으로 합쳐 MP4로 저장합니다.
+- **원하는 순서로 이어 붙이기**: Commons 링크나 내 파일을 추가하고 순서를 바꿔 한 편으로 만듭니다.
+- **외부 영상 처리 서버 없음**: 병합은 기기 안에서 처리하며, 강의명·과목·주차에 맞춰 파일을 정리합니다.
 
-별도 배포용 PAT는 저장하지 않으며, 워크플로의 저장소 전용 `GITHUB_TOKEN`으로 릴리스만 게시합니다. 비공개 저장소의 릴리스도 동일하게 비공개입니다. 로컬 테스트 영상·합성 세션·브라우저 프로필은 ZIP이나 저장소에 넣지 않습니다.
+## 설치
 
-## 소스에서 빌드
+별도 Bun이나 ffmpeg 설치 없이, **완성된 ZIP**으로 사용할 수 있습니다.
+
+### 1. 최신 버전 받기
+
+**[설치 ZIP 다운로드](https://github.com/PeraSite/learningx-video-extension/releases/latest/download/learningx-video-extension.zip)**
+
+다운로드가 시작되지 않으면 [Releases](https://github.com/PeraSite/learningx-video-extension/releases/latest)의 **Assets → `learningx-video-extension.zip`**을 선택하세요.
+`Source code (zip)`은 설치 파일이 아닙니다.
+
+### 2. 압축 풀기
+
+ZIP을 원하는 위치에 풀어 주세요. `manifest.json`이 바로 들어 있는 폴더가 확장 프로그램 폴더입니다.
+설치 후에도 이 폴더를 지우거나 다른 위치로 옮기지 마세요.
+
+### 3. Chrome에 추가하기
+
+1. 주소창에 `chrome://extensions`를 입력합니다.
+2. 오른쪽 위 **개발자 모드**를 켭니다.
+3. **압축해제된 확장 프로그램을 로드합니다**를 누릅니다.
+4. 앞에서 압축을 푼 폴더를 선택합니다.
+
+### 4. LearningX 새로고침
+
+기존 LearningX 주차학습 탭을 새로고침하면 강의 옆에 **다운로드** 버튼이 생깁니다.
+
+> Chrome 웹 스토어 배포본이 아닙니다. ZIP을 Chrome에 그대로 끌어 넣는 방식이 아니라, **압축을 푼 폴더를 로드**해야 합니다.
+
+<details>
+<summary>새 버전으로 업데이트하기</summary>
+
+1. 최신 설치 ZIP을 받아 압축을 풉니다.
+2. **기존에 로드한 확장 폴더**의 내용을 새 파일로 교체합니다.
+3. `chrome://extensions`에서 이 확장 프로그램의 **새로고침**을 누릅니다.
+4. LearningX 탭도 새로고침합니다.
+
+GitHub Release의 파일은 자동으로 설치·업데이트되지 않습니다.
+
+</details>
+
+## 사용법
+
+### 강의 한 편 저장하기
+
+LearningX에 로그인한 뒤, 주차학습에서 원하는 강의를 펼치고 **다운로드**를 누르세요.
+단일 MP4는 바로 저장하고, 여러 조각으로 된 강의는 뒤에서 자동으로 합칩니다.
+처리 중 같은 버튼을 다시 누르면 취소할 수 있습니다.
+
+저장 위치는 Chrome 기본 다운로드 폴더 아래 `LearningX/과목/주차/강의명.mp4`입니다.
+
+### 여러 영상을 한 편으로 만들기
+
+1. Chrome 툴바에서 확장 아이콘을 누릅니다.
+2. **파일** 또는 **Commons 링크**로 영상을 추가합니다. 파일은 끌어 놓아도 됩니다.
+3. 목록의 화살표로 순서를 정하고 **합치기**를 누릅니다.
+4. 미리보기를 확인한 뒤 **MP4 저장**을 누릅니다.
+
+기본 **원본 화질 유지**는 재인코딩 없이 빠르게 연결합니다.
+영상 형식이 다르면 **호환 모드 · 720p**로 변환해서 합칠 수 있습니다.
+`각각 저장`을 선택하면 강의별 파일로 저장합니다.
+
+<details>
+<summary>다운로드 기록과 모바일 폭 화면 보기</summary>
+
+최근 다운로드는 오른쪽 위 버튼에서 확인하고, 저장한 파일의 폴더를 열 수 있습니다.
+
+![다운로드 기록](docs/images/history.png)
+
+아래는 좁은 화면에서의 레이아웃입니다. **모바일 Chrome용 확장 지원을 뜻하지는 않습니다.**
+
+![좁은 화면 레이아웃](docs/images/mobile.png)
+
+</details>
+
+## 지원 범위
+
+- **브라우저:** 데스크톱 Chrome 116 이상.
+- **LMS:** 숭실대학교 LearningX / Commons. 다른 대학은 별도 검증이 필요합니다.
+- **빠른 병합:** 입력 합계 512 MiB까지. 영상·음성 형식이 같아야 합니다.
+- **호환 모드:** 입력 합계 10분·128 MiB까지. 720p / H.264 / AAC로 변환합니다.
+- **지원하지 않음:** DRM·암호화 영상, HLS/DASH, 다중 영상·음성 트랙, 열람 제한 우회.
+
+병합에는 메모리가 필요하며, 제한 이내에서도 기기 상태에 따라 실패할 수 있습니다.
+고급 화면에서 시작한 병합은 해당 탭을 닫으면 중단됩니다.
+
+## 개인정보와 사용 권한
+
+학교 로그인 세션은 해당 LearningX 프레임에서만 사용합니다. 세션 토큰을 확장 저장소나 별도 처리 서버에 저장하지 않으며,
+출석·학습 진도를 변경하지 않습니다. 실행에 필요한 JS와 WASM도 확장에 포함되어 있습니다.
+
+**현재 열람·저장이 허용된 콘텐츠만 사용하세요.** 원본 주소가 공개되어 있어도 복제·재배포 권한을 뜻하지는 않습니다.
+학교 약관과 콘텐츠 권리자의 허용 범위를 확인해야 합니다. 학교·LearningX에서 제공하는 공식 도구가 아닙니다.
+
+## 개발하기
 
 ```bash
-bun install
+git clone https://github.com/PeraSite/learningx-video-extension.git
+cd learningx-video-extension
+bun install --frozen-lockfile
 bun run build
 ```
 
-1. Chrome에서 `chrome://extensions`를 엽니다.
-2. **개발자 모드**를 켜고 **압축해제된 확장 프로그램을 로드**를 누릅니다.
-3. 이 프로젝트의 **`dist` 폴더**를 선택합니다. 프로젝트 루트가 아닙니다.
-4. 기존 LearningX 주차학습 탭을 새로고침합니다.
-5. **LMS 강의 옆에 생긴 `다운로드` 버튼을 누릅니다. 별도 화면으로 이동하지 않고 바로 저장합니다.**
-6. 단일 MP4는 직접 저장하고, 조각 영상은 숨겨진 offscreen 문서에서 자동 병합한 다음 저장합니다. 버튼에 진행/완료/실패 상태가 표시되며, 처리 중 다시 누르면 취소합니다.
+생성된 `dist` 폴더를 Chrome에 로드하면 됩니다.
+테스트, 구조, 기여 방법은 **[개발 가이드](docs/DEVELOPMENT.md)**에 정리했습니다.
 
-확장 아이콘은 **선택 기능인 고급 병합 화면**만 엽니다. 기본 다운로드에 고급 화면을 사용할 필요는 없습니다.
+`main`에 푸시하면 Actions가 단위 테스트·빌드·실제 Chromium 통합 테스트를 수행하고,
+검증한 ZIP과 `SHA256SUMS.txt`를 새 [Release](https://github.com/PeraSite/learningx-video-extension/releases/latest)에 올립니다.
 
-`release/learningx-video-extension-0.1.0.zip`은 동일 빌드의 압축본입니다. 압축을 풀어 `manifest.json`이 들어 있는 폴더를 로드합니다. CRX 서명/스토어 등록은 하지 않습니다.
+## 라이선스와 고지
 
-## 기본 사용: LMS 버튼 한 번
+이 프로젝트 자체의 소스코드 라이선스는 아직 지정하지 않았습니다.
+공개 저장소라는 사실만으로 재사용·재배포 허가를 가정하지 마세요.
 
-- 주차학습의 강의 옆, 또는 강의 상세 화면 우측 하단의 **다운로드** 버튼을 누릅니다.
-- 원본 확인 → 단일 MP4 다운로드 또는 조각 자동 병합 → 저장 완료. 별도 탭이나 별도 프로그램을 열지 않습니다.
-- 저장은 Chrome의 기본 다운로드 폴더 아래 `LearningX/과목/주차/강의명.mp4`로 진행됩니다.
-- 자동 병합은 원본 유지 모드입니다. 조각의 형식이 다르면 실패 사유를 표시하고, 원한다면 고급 화면에서 호환 모드를 사용할 수 있습니다.
-- 브라우저 종료 시 진행 중인 자동 병합은 보존되지 않습니다. 작업이 실패하면 페이지를 새로고침하고 다시 눌러 주세요.
-
-## 선택 기능: 고급 병합 화면
-
-확장 아이콘을 눌렀을 때만 여는 화면입니다. 여러 강의 자체를 한 편으로 합치거나 내 파일을 다루는 용도입니다.
-
-- **강의 감지:** 주차학습에서 원하는 주차를 펼칩니다. 화면에 로드된 항목이 수집됩니다. 자료·과제도 목록에 잡힐 수 있으며, 영상 확인 시 구분합니다.
-- **Commons 링크:** `https://commons.ssu.ac.kr/em/{영상ID}` 형식의 원본 링크를 여러 줄로 붙여 넣습니다.
-- **내 파일:** MP4/MOV/WebM/MKV/TS 등을 여러 개 선택합니다. 파일을 외부로 업로드하지 않습니다.
-- 체크박스로 선택하고 위/아래 화살표로 순서를 바꿉니다.
-- **하나로 이어 붙이기:** 선택된 강의의 조각을 순서대로 모두 합칩니다. 완료 후 미리보기에서 확인하고 **MP4 저장**을 누릅니다.
-- **강의별로 따로 저장:** 단일 MP4는 Chrome 다운로드 관리자로 직접 저장하고, 여러 조각은 ffmpeg.wasm으로 병합 후 저장합니다.
-- Chrome 기본 다운로드 폴더의 `LearningX/과목/주차/강의명.mp4`에 정리합니다. 개별 저장 요청과 실제 다운로드 완료는 구분해 표시합니다.
-
-## 병합 모드
-
-### 빠른 병합 (기본)
-
-`ffmpeg concat demuxer`와 `-c copy`를 사용합니다. 해상도/프레임/코덱 초기화 데이터/회전 메타데이터/음성 구성이 같은 경우만 허용합니다. 원본 화질을 유지합니다. 병합 후 재생 시간 합계·음성 트랙 존재 및 각 접합부의 짧은 영상/음성 디코딩을 검사합니다. 전체 영상 완전 디코딩 검사를 대체하는 것은 아닙니다.
-
-### 호환 모드
-
-각 파일을 1280×720 / 30fps / H.264 (최대 2 Mbps) / AAC 48kHz stereo로 맞춘 뒤 연결합니다. 화면 비율을 유지하고 여백을 추가합니다. 음성이 없는 파일은 무음 트랙을 추가합니다. **원본 음성을 임의로 버리는 fallback은 없습니다.** 재인코딩으로 화질이 바뀌며, 긴 영상은 매우 느릴 수 있습니다. 호환 모드는 합계 **10분·128 MiB** 이내로 제한하고, 중간 변환 결과에도 **192 MiB** 예산을 적용합니다.
-
-### 브라우저 제한
-
-- 병합 입력 합계 **512 MiB** 제한. 원격 파일의 실제 수신 바이트와 로컬 파일 크기를 모두 셉니다.
-- `WORKERFS`로 Blob/File을 읽기 전용 마운트해 입력 전체를 WASM 메모리에 복사하지 않습니다. 출력·디코더에는 여전히 큰 메모리가 필요합니다.
-- 입력이 제한 이하라도 기기/Chrome 상태에 따라 메모리가 부족할 수 있습니다.
-- 작업 취소 시 네트워크 요청을 중단하고 ffmpeg worker를 종료합니다.
-- **병합 탭을 닫으면 작업과 미저장 미리보기가 사라집니다.** 현재 작업 자동 복구는 지원하지 않습니다. 이미 시작된 직접 다운로드는 Chrome이 관리합니다.
-- ffmpeg concat의 진행률은 부정확할 수 있어 임의의 퍼센트 대신 단계·처리 시간을 표시합니다.
-- 멀티스레드 코어가 아닌 **단일 스레드 코어**를 번들합니다. SharedArrayBuffer/교차 출처 격리 없이 작동하며 별도 ffmpeg 설치가 필요 없습니다.
-- HLS/DASH/DRM/암호화 영상, 다중 음성·영상 트랙, 전체 대학 공통 지원은 하지 않습니다.
-
-## 인증·권한·보안
-
-- 숭실대 Canvas와 Commons, 실제 지원 CDN 2개에만 호스트 권한을 요청합니다. `<all_urls>`, cookies API, debugger 권한은 없습니다.
-- LearningX 강의 조회는 기존 로그인 세션으로 **같은 프레임에서 GET만** 수행합니다. 세션 토큰을 확장 저장소/메시지/로그/외부 서버에 저장하거나 전송하지 않습니다. 학교 API로의 정상 인증 헤더만 사용합니다.
-- 강의 열람 종료/`not_open` 응답은 거부합니다. 썸네일 UUID로 제한을 우회하는 기능은 없습니다. 공개 Commons 링크 수동 입력은 별도 경로입니다.
-- 원본 링크가 공개되었다는 사실이 복제·재배포 허락을 뜻하지는 않습니다. 사용자는 학교 약관과 저작권자의 허용 범위를 확인해야 합니다.
-- 출석, 학습 진도, 재생 완료 상태를 변경하는 코드는 없습니다.
-- 모든 실행 JS/WASM은 로컬 번들입니다. 실행 시 외부 코드 CDN을 사용하지 않습니다.
-- 기본 로컬 저장: 강의 제목/주소, 다운로드 ID/상태/파일명. 로그인 비밀이나 영상 본문은 저장소에 기록하지 않습니다.
-- 다른 대학/다른 LearningX 설치는 별도 어댑터와 권한 검증이 필요합니다.
-
-## 개발·검증
-
-```bash
-bun run dev           # 웹 미리보기. 로컬 파일 병합 가능, 학교 세션 연동은 확장 설치 필요
-bun run typecheck
-bun test
-bun x playwright install chromium
-bun run test:e2e      # ffmpeg/ffprobe가 PATH에 필요. 생성한 테스트 영상 사용
-```
-
-테스트는 분리된 Chrome for Testing 프로필에서 실제 확장을 로드합니다. 사용자 브라우저 세션은 복제하지 않습니다. LearningX 모의 페이지/모의 인증으로 iframe 수집과 GET-only 접근·제한 거부를 검증하며, **실제 학교 계정과 실시간 DOM 지원 검증과는 구분**해야 합니다.
-
-환경변수 `TEST_OUTPUT_DIR`, `FFMPEG_PATH`, `FFPROBE_PATH`로 테스트 출력/실행 파일을 지정할 수 있습니다.
-
-## 구조
-
-- `src/content.ts`: LearningX iframe 수집, 버튼, 로컬 인증 GET
-- `src/background.ts`: 선택적 고급 창, 감지 목록, 다운로드 메시지
-- `src/direct.ts`: LMS 원클릭 → 직접 저장/자동 병합 작업
-- `src/offscreen.ts`: 화면 없는 조각 다운로드/ffmpeg.wasm 병합
-- `src/history.ts`: 다운로드 기록 직렬화
-- `src/commons.ts`: URL 허용 목록, XML 해석, 세그먼트/미러 구분
-- `src/network.ts`: 미디어 검사, 후보 URL fallback, 수신 바이트 제한
-- `src/merger.ts`: WORKERFS/ffprobe/concat/호환 변환/취소
-- `src/studio.ts`: 선택·정렬·다운로드·로컬 파일·미리보기
-- `scripts/prepare.ts`: 실행 코드/WASM을 로컬에 포함
-- `scripts/build.ts`: Bun 브라우저 번들러로 MV3 산출물 생성
-
-## 배포 전 확인
-
-이 빌드는 로컬 개발 설치용입니다. GitHub 비공개 자동 릴리스와 별개로 Chrome Web Store 게시·개인정보처리방침·학교 약관 확인·타사 라이선스 이행은 별도입니다. **`@ffmpeg/core`는 GPL-2.0-or-later**이며 상용 판매 가능 여부와 별개로 배포 시 라이선스 및 대응 소스 제공 등 의무를 검토해야 합니다. 프로젝트 자체 라이선스는 아직 지정하지 않았습니다. `THIRD_PARTY_NOTICES.md`를 확인하세요.
-
-## 화면 구성
-
-LMS의 작은 다운로드 버튼이 기본 진입점입니다. 고급 화면은 TDS 공개 blue500/grey 토큰을 적용하고, 장식용 배지·영문 라벨·히어로·중복 설명을 제거했습니다. 그레이 입력 영역과 설정 영역만 묶고, 최근 다운로드와 사용법은 오른쪽 위 버튼에서 각각 모달로 엽니다. 메인 화면에는 별도 기록 목록이나 중복 제목을 두지 않습니다. 저장 방식은 항상 보이는 라디오 그룹으로 선택합니다. 공식 TDS 제품 또는 토스 제공 소프트웨어는 아닙니다.
-
-사용법 모달은 Esc, 닫기 버튼, 배경 클릭으로 닫을 수 있으며 키보드 포커스를 복원합니다. 파일 추가 영역은 점선 테두리이며 클릭 선택과 드래그 앤 드롭을 지원합니다.
-
-상단에는 **LearningX 영상 다운로더** 제목 하나만 표시합니다. `최근 다운로드` 버튼은 `사용법` 왼쪽에 있으며, 내역이 없을 때도 빈 상태를 보여줍니다. 두 모달 모두 Esc, 닫기 버튼, 배경 클릭으로 닫을 수 있습니다.
+포함된 `@ffmpeg/core`는 **GPL-2.0-or-later**이며, 다른 의존성에도 각각의 라이선스가 적용됩니다.
+[타사 고지](THIRD_PARTY_NOTICES.md)와 [라이선스 원문](docs/licenses/)을 확인하세요.
+공개·상업 배포 시 대응 소스 제공을 포함한 적용 의무는 별도로 확인해야 합니다.
