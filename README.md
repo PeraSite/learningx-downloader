@@ -28,7 +28,7 @@ LearningX 강의를 저장하고, 여러 영상을 브라우저 안에서 이어
 
 **[설치 ZIP 다운로드](https://github.com/PeraSite/learningx-video-extension/releases/latest/download/learningx-video-extension.zip)**
 
-다운로드가 시작되지 않으면 [Releases](https://github.com/PeraSite/learningx-video-extension/releases/latest)의 **Assets → `learningx-video-extension.zip`**을 선택하세요.
+다운로드가 시작되지 않으면 [Releases](https://github.com/PeraSite/learningx-video-extension/releases/latest)에서 **Assets**를 열고 `learningx-video-extension.zip`을 선택하세요.
 `Source code (zip)`은 설치 파일이 아닙니다.
 
 ### 2. 압축 풀기
@@ -124,7 +124,7 @@ bun run build
 ```
 
 생성된 `dist` 폴더를 Chrome에 로드하면 됩니다.
-테스트, 구조, 기여 방법은 **[개발 가이드](docs/DEVELOPMENT.md)**에 정리했습니다.
+테스트, 구조, 기여 방법은 [개발 가이드](docs/DEVELOPMENT.md)에 정리했습니다.
 
 `main`에 푸시하면 Actions가 단위 테스트·빌드·실제 Chromium 통합 테스트를 수행하고,
 검증한 ZIP과 `SHA256SUMS.txt`를 새 [Release](https://github.com/PeraSite/learningx-video-extension/releases/latest)에 올립니다.
