@@ -17,6 +17,9 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      NEEDRESTART_MODE: a
     permissions:
       contents: write
     defaults:
@@ -40,10 +43,23 @@ jobs:
           bun-version: '1.4.0'
 
       - name: Install Ubuntu media and archive tools
+        timeout-minutes: 5
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends ffmpeg openssl zip unzip
+          missing=()
+          for tool in ffmpeg ffprobe openssl zip unzip; do
+            if ! command -v "$tool" >/dev/null 2>&1; then
+              package="$tool"
+              if [[ "$tool" == ffprobe ]]; then package=ffmpeg; fi
+              missing+=("$package")
+            fi
+          done
+          if (( ${#missing[@]} )); then
+            sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+            sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get install --yes --no-install-recommends "${missing[@]}"
+          else
+            echo 'All media/archive tools are already installed; skipping apt.'
+          fi
           ffmpeg -version
           ffprobe -version
           /usr/bin/openssl version
@@ -83,6 +99,7 @@ jobs:
           printf 'tag=build-%s-%s\n' "$GITHUB_RUN_NUMBER" "${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
 
       - name: Install real Playwright Chromium
+        timeout-minutes: 5
         run: bun x playwright install --with-deps chromium --no-shell
 
       - name: Run browser E2E against the release payload
