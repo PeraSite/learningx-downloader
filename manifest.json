@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "LearningX 영상 다운로더",
+  "name": "learningx-downloader",
   "version": "0.1.0",
-  "description": "허용된 LearningX / Commons 영상을 로컬에 저장하고 ffmpeg.wasm으로 병합합니다.",
+  "description": "LearningX / Commons의 영상·PDF·첨부 자료를 저장하고, 조각 영상은 기기 안에서 MP4로 합칩니다.",
   "minimum_chrome_version": "116",
   "permissions": [
     "downloads",
@@ -16,7 +16,7 @@
     "https://ssu-toast.commonscdn.com/*"
   ],
   "action": {
-    "default_title": "LearningX 영상 다운로더"
+    "default_title": "learningx-downloader"
   },
   "background": {
     "service_worker": "background.js",

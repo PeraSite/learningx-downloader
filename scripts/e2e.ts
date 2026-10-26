@@ -18,7 +18,7 @@ try {
   console.log(`Loaded extension ${id}`);
   const studio=await context.newPage();studio.on('pageerror',error=>errors.push(error.message));
   await studio.goto(`chrome-extension://${id}/studio.html`);
-  await expect(studio.locator('header h1')).toHaveText('LearningX 영상 다운로더');
+  await expect(studio.locator('header h1')).toHaveText('learningx-downloader');
   await expect(studio.locator('h1')).toHaveCount(1);await expect(studio.locator('.page-heading,.wordmark')).toHaveCount(0);
   const titleBox=await studio.locator('header h1').boundingBox();const historyBox=await studio.locator('#open-history').boundingBox();const helpBox=await studio.locator('#open-help').boundingBox();if(!titleBox||titleBox.y>80||!historyBox||!helpBox||historyBox.x>=helpBox.x)throw new Error('Header layout incorrect');
   await expect(studio.locator('header h1')).toHaveCSS('font-size','30px');results.push({test:'single-header-title-and-action-order',passed:true});
@@ -42,7 +42,7 @@ try {
   await studio.locator('#open-help').click();await studio.locator('#close-help').click();await expect(studio.locator('#help-dialog')).not.toBeVisible();
   await studio.locator('#open-help').click();await studio.mouse.click(8,8);await expect(studio.locator('#help-dialog')).not.toBeVisible();
   results.push({test:'help-modal-focus-escape-and-backdrop',passed:true});
-  await studio.locator('#open-history').click();await expect(studio.getByRole('dialog',{name:'최근 다운로드',exact:true})).toBeVisible();await expect(studio.locator('#close-history')).toBeFocused();await expect(studio.locator('#history')).toContainText('아직 다운로드한 영상이 없어요.');await expect(studio.locator('#clear-history')).toBeHidden();
+  await studio.locator('#open-history').click();await expect(studio.getByRole('dialog',{name:'최근 다운로드',exact:true})).toBeVisible();await expect(studio.locator('#close-history')).toBeFocused();await expect(studio.locator('#history')).toContainText('아직 다운로드한 파일이 없어요.');await expect(studio.locator('#clear-history')).toBeHidden();
   await studio.keyboard.press('Escape');await expect(studio.locator('#history-dialog')).not.toBeVisible();await expect(studio.locator('#open-history')).toBeFocused();
   await studio.locator('#open-history').click();await studio.locator('#close-history').click();await expect(studio.locator('#history-dialog')).not.toBeVisible();
   await studio.locator('#open-history').click();await studio.mouse.click(8,8);await expect(studio.locator('#history-dialog')).not.toBeVisible();results.push({test:'history-modal-focus-escape-backdrop-and-empty-state',passed:true});
@@ -74,12 +74,13 @@ try {
   await studio.locator('#start').click();await studio.locator('#cancel').click();await waitJob('취소됨');results.push({test:'cancel',passed:true});await studio.locator('#merge-mode').selectOption('copy');
   await context.route('https://canvas.ssu.ac.kr/**',async route=>{
     const url=new URL(route.request().url());
+    if(url.pathname==='/learningx/api/v1/courses/123/modules')return route.fulfill({json:[{module_items:[456,457,458].map((module_item_id,index)=>({module_item_id,content_type:'attendance_item',content_id:111+index,content_data:{item_content_type:'commons',item_content_data:{content_type:'movie'}}}))}]});
     if(url.pathname==='/courses/123/external_tools/71')return route.fulfill({contentType:'text/html; charset=utf-8',body:'<html><head><meta charset="UTF-8"><title>LMS 원클릭 통합 테스트</title><style>body{font-family:system-ui;padding:36px;background:#f7f8f4;color:#203b30}iframe{width:100%;height:360px;border:1px solid #dfe6de;border-radius:12px;background:white}a{color:#145744}h1{font-size:28px}</style></head><body><h1>LMS 원클릭 통합 테스트</h1><p>실제 학교 화면이 아닌 테스트용 LearningX 모의 페이지입니다.</p><a href="/courses/123">테스트 과목</a><iframe title="도구 내용" src="/learningx/lti/modulebuilder"></iframe></body></html>'});
     if(url.pathname==='/learningx/lti/modulebuilder')return route.fulfill({contentType:'text/html; charset=utf-8',body:'<html><head><meta charset="UTF-8"><style>body{font-family:system-ui;padding:24px}ul{list-style:none;padding:0}li{padding:20px;border-bottom:1px solid #e5e7eb}a{color:#203b30;text-decoration:none;font-weight:600}</style></head><body><h2>5주차 학습</h2><ul><li>5주차 <a href="/courses/123/modules/items/456">테스트 조각 강의</a></li><li>5주차 <a href="/courses/123/modules/items/457">열람 종료 강의</a></li><li>5주차 <a href="/courses/123/modules/items/458">단일 MP4 강의</a></li></ul></body></html>'});
     if(url.pathname.match(/^\/courses\/123\/modules\/items\/(456|457|458)$/))return route.fulfill({contentType:'text/html; charset=utf-8',body:`<iframe src="/learningx/lti/lecture_attendance/items/view/${url.pathname.endsWith('456')?'111':url.pathname.endsWith('457')?'112':'113'}"></iframe>`});
     if(url.pathname.match(/^\/learningx\/api\/v1\/courses\/123\/attendance_items\/(111|112|113)$/)) {
       if(route.request().headers().authorization!=='Bearer synthetic-test-session')throw new Error('Missing local session authorization');
-      return route.fulfill({json:{course_id:123,item_content_type:'commons',title:url.pathname.endsWith('111')?'테스트 조각 강의':url.pathname.endsWith('112')?'열람 종료 강의':'단일 MP4 강의',published:true,lecture_period_status:url.pathname.endsWith('112')?'closed':'open',week_position:5,item_content_data:{content_id:url.pathname.endsWith('111')?'test123':url.pathname.endsWith('112')?'not_open':'testsingle',duration:5}}});
+      return route.fulfill({json:{course_id:123,item_content_type:'commons',title:url.pathname.endsWith('111')?'테스트 조각 강의':url.pathname.endsWith('112')?'열람 종료 강의':'단일 MP4 강의',published:true,lecture_period_status:url.pathname.endsWith('112')?'closed':'open',week_position:5,item_content_data:{content_type:'movie',content_id:url.pathname.endsWith('111')?'test123':url.pathname.endsWith('112')?'not_open':'testsingle',duration:5}}});
     }
     return route.fulfill({status:404,body:'not found'});
   });
@@ -112,7 +113,7 @@ try {
   const downloadsAfter=await worker.evaluate(async()=> (await chrome.downloads.search({})).length);if(downloadsAfter!==downloadsBefore)throw new Error('Closed lecture downloaded');results.push({test:'closed-lecture-rejected',passed:true});
   await source.screenshot({path:join(out,'lms-one-click.png'),fullPage:true});
   const advanced=await context.newPage();await advanced.goto('chrome-extension://'+id+'/studio.html');await advanced.locator('#clear').click();await advanced.locator('#tab-links').click();await advanced.locator('#links').fill('https://evil.com/em/x');await advanced.locator('#add-links').click();await expect(advanced.locator('.queue-row')).toHaveCount(0);results.push({test:'untrusted-link-rejected',passed:true});
-  await advanced.locator('#open-history').click();await expect(advanced.locator('#history-dialog')).toBeVisible();await advanced.locator('#clear-history').click();await expect(advanced.locator('#history')).toContainText('아직 다운로드한 영상이 없어요.');await expect(advanced.locator('#clear-history')).toBeHidden();await advanced.locator('#close-history').click();results.push({test:'history-dialog-and-clear',passed:true});
+  await advanced.locator('#open-history').click();await expect(advanced.locator('#history-dialog')).toBeVisible();await advanced.locator('#clear-history').click();await expect(advanced.locator('#history')).toContainText('아직 다운로드한 파일이 없어요.');await expect(advanced.locator('#clear-history')).toBeHidden();await advanced.locator('#close-history').click();results.push({test:'history-dialog-and-clear',passed:true});
   if(errors.length)throw new Error(`Browser errors: ${errors.join(' | ')}`);
   await Bun.write(join(out,'results.json'),JSON.stringify({passed:true,results,errors},null,2));console.log(JSON.stringify({passed:true,tests:results.map(r=>r.test),out},null,2));
 } catch(error){await Bun.write(join(out,'results.json'),JSON.stringify({passed:false,results,errors,error:String(error)},null,2));for(const p of context.pages())try{if(p.url().includes('/studio.html'))await p.screenshot({path:join(out,'failure.png'),fullPage:true});}catch{}throw error;}finally{await context.close();mediaServer.stop();}

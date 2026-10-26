@@ -1,4 +1,4 @@
-name: Release extension
+name: Release learningx-downloader
 
 on:
   push:
@@ -92,17 +92,17 @@ jobs:
           # Repackage only: preserve the built payload, adding commit provenance.
           bun -e 'await Bun.write("dist/BUILD_INFO.json", JSON.stringify({ GITHUB_SHA: process.env.GITHUB_SHA, GITHUB_RUN_ID: process.env.GITHUB_RUN_ID, GITHUB_RUN_NUMBER: process.env.GITHUB_RUN_NUMBER, builtAt: new Date().toISOString() }, null, 2) + "\n");'
           bun run package
-          archive="release/learningx-video-extension-${version}.zip"
+          archive="release/learningx-downloader-${version}.zip"
           test -s "$archive"
           mkdir -p "$RELEASE_ASSET_DIR"
-          cp -- "$archive" "$RELEASE_ASSET_DIR/learningx-video-extension.zip"
-          unzip -tq "$RELEASE_ASSET_DIR/learningx-video-extension.zip"
+          cp -- "$archive" "$RELEASE_ASSET_DIR/learningx-downloader.zip"
+          unzip -tq "$RELEASE_ASSET_DIR/learningx-downloader.zip"
           # E2E loads dist, so replace it with the actual release payload.
           rm -rf -- dist
           mkdir dist
-          unzip -q "$RELEASE_ASSET_DIR/learningx-video-extension.zip" -d dist
+          unzip -q "$RELEASE_ASSET_DIR/learningx-downloader.zip" -d dist
           bun -e 'const source = await Bun.file("manifest.json").json(); const packed = await Bun.file("dist/manifest.json").json(); const info = await Bun.file("dist/BUILD_INFO.json").json(); if (packed.version !== source.version || info.GITHUB_SHA !== process.env.GITHUB_SHA) throw new Error("Packaged manifest or commit mismatch");'
-          (cd "$RELEASE_ASSET_DIR" && sha256sum learningx-video-extension.zip > SHA256SUMS.txt)
+          (cd "$RELEASE_ASSET_DIR" && sha256sum learningx-downloader.zip > SHA256SUMS.txt)
           printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
           printf 'tag=build-%s-%s\n' "$GITHUB_RUN_NUMBER" "${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
 
@@ -140,7 +140,7 @@ jobs:
           notes="$RUNNER_TEMP/learningx-release-notes.md"
           cat > "$notes" <<'NOTES'
           ## 설치 방법
-          1. `learningx-video-extension.zip`을 다운로드하고 압축을 풉니다.
+          1. `learningx-downloader.zip`을 다운로드하고 압축을 풉니다.
           2. Chrome에서 `chrome://extensions`를 열고 개발자 모드를 켭니다.
           3. '압축해제된 확장 프로그램을 로드합니다'를 눌러 `manifest.json`이 있는 압축 해제 폴더를 선택합니다.
 
@@ -165,14 +165,14 @@ jobs:
             if [[ "$is_draft" != true ]]; then
               gh release edit "$TAG" --draft=true
             fi
-            gh release upload "$TAG" learningx-video-extension.zip SHA256SUMS.txt --clobber
+            gh release upload "$TAG" learningx-downloader.zip SHA256SUMS.txt --clobber
             ensure_current_main
             gh release edit "$TAG" --draft=false --target "$GITHUB_SHA" \
               --title "$title" --notes-file "$notes" --latest
           else
             ensure_current_main
             # gh creates a draft, uploads both assets, then publishes it.
-            gh release create "$TAG" learningx-video-extension.zip SHA256SUMS.txt \
+            gh release create "$TAG" learningx-downloader.zip SHA256SUMS.txt \
               --target "$GITHUB_SHA" --title "$title" --notes-file "$notes" --latest
           fi
 

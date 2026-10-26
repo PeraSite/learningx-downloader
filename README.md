@@ -1,24 +1,26 @@
-# LearningX 영상 다운로더
+# learningx-downloader
 
-**강의 옆에서 한 번 클릭. 조각 영상도 MP4 한 편으로.**
+**LearningX 영상과 수업 자료를 한 번에 저장하세요.**
 
-LearningX 강의를 저장하고, 여러 영상을 브라우저 안에서 이어 붙이는 Chrome 확장 프로그램입니다.
+LearningX / Commons의 영상·PDF·첨부 자료를 내려받는 Chrome 확장 프로그램입니다. 조각 영상은 자동으로 MP4로 합치고, 문서와 첨부 파일은 원본 그대로 저장합니다.
 현재 **숭실대학교 LearningX / Commons**를 지원합니다.
 
-[![최신 ZIP 다운로드](https://img.shields.io/badge/최신_ZIP_다운로드-3182f6?style=for-the-badge)](https://github.com/PeraSite/learningx-video-extension/releases/latest/download/learningx-video-extension.zip)
-[![GitHub Release](https://img.shields.io/github/v/release/PeraSite/learningx-video-extension?label=release&color=4e5968&style=flat-square)](https://github.com/PeraSite/learningx-video-extension/releases/latest)
-[![Build](https://github.com/PeraSite/learningx-video-extension/actions/workflows/release.yml/badge.svg)](https://github.com/PeraSite/learningx-video-extension/actions/workflows/release.yml)
+[![최신 ZIP 다운로드](https://img.shields.io/badge/최신_ZIP_다운로드-3182f6?style=for-the-badge)](https://github.com/PeraSite/learningx-downloader/releases/latest/download/learningx-downloader.zip)
+[![GitHub Release](https://img.shields.io/github/v/release/PeraSite/learningx-downloader?label=release&color=4e5968&style=flat-square)](https://github.com/PeraSite/learningx-downloader/releases/latest)
+[![Build](https://github.com/PeraSite/learningx-downloader/actions/workflows/release.yml/badge.svg)](https://github.com/PeraSite/learningx-downloader/actions/workflows/release.yml)
 
-[설치](#설치) · [사용법](#사용법) · [지원 범위](#지원-범위) · [개발 가이드](docs/DEVELOPMENT.md) · [문제 제보](https://github.com/PeraSite/learningx-video-extension/issues)
+[설치](#설치) · [사용법](#사용법) · [지원 범위](#지원-범위) · [개발 가이드](docs/DEVELOPMENT.md) · [문제 제보](https://github.com/PeraSite/learningx-downloader/issues)
 
-![LearningX 영상 다운로더 화면](docs/images/studio.png)
+![learningx-downloader 영상 병합 화면](docs/images/studio.png)
 
 ## 필요한 기능만, 간단하게
 
-- **LMS에서 바로 저장**: 강의 옆 `다운로드` 버튼을 누르면 별도 작업 화면 없이 저장합니다.
+- **LMS에서 바로 저장**: 영상이나 자료 옆 `다운로드` 버튼을 누르면 별도 작업 화면 없이 저장합니다.
+- **문서·첨부 자료 원본 저장**: PDF, PPTX, ZIP 등 파일 자료의 이름과 확장자를 유지합니다.
+- **콘텐츠 타입으로 구분**: 영상·파일·PDF에만 버튼을 표시합니다. 퀴즈·과제·외부 링크에는 표시하지 않습니다.
 - **조각 영상 자동 병합**: 나뉜 미디어를 로컬 ffmpeg.wasm으로 합쳐 MP4로 저장합니다.
-- **원하는 순서로 이어 붙이기**: Commons 링크나 내 파일을 추가하고 순서를 바꿔 한 편으로 만듭니다.
-- **외부 영상 처리 서버 없음**: 병합은 기기 안에서 처리하며, 강의명·과목·주차에 맞춰 파일을 정리합니다.
+- **원하는 순서로 이어 붙이기**: Commons 영상 링크나 내 영상을 추가하고 순서를 바꿔 한 편으로 만듭니다.
+- **과목·주차별 정리**: Chrome 다운로드 폴더 안에 저장합니다. 영상 병합도 기기 안에서 처리합니다.
 
 ## 설치
 
@@ -26,9 +28,9 @@ LearningX 강의를 저장하고, 여러 영상을 브라우저 안에서 이어
 
 ### 1. 최신 버전 받기
 
-**[설치 ZIP 다운로드](https://github.com/PeraSite/learningx-video-extension/releases/latest/download/learningx-video-extension.zip)**
+**[설치 ZIP 다운로드](https://github.com/PeraSite/learningx-downloader/releases/latest/download/learningx-downloader.zip)**
 
-다운로드가 시작되지 않으면 [Releases](https://github.com/PeraSite/learningx-video-extension/releases/latest)에서 **Assets**를 열고 `learningx-video-extension.zip`을 선택하세요.
+다운로드가 시작되지 않으면 [Releases](https://github.com/PeraSite/learningx-downloader/releases/latest)에서 **Assets**를 열고 `learningx-downloader.zip`을 선택하세요.
 `Source code (zip)`은 설치 파일이 아닙니다.
 
 ### 2. 압축 풀기
@@ -45,7 +47,7 @@ ZIP을 원하는 위치에 풀어 주세요. `manifest.json`이 바로 들어 �
 
 ### 4. LearningX 새로고침
 
-기존 LearningX 주차학습 탭을 새로고침하면 강의 옆에 **다운로드** 버튼이 생깁니다.
+기존 LearningX 주차학습 탭을 새로고침하면 영상·파일·PDF 자료 옆에 **다운로드** 버튼이 생깁니다.
 
 > Chrome 웹 스토어 배포본이 아닙니다. ZIP을 Chrome에 그대로 끌어 넣는 방식이 아니라, **압축을 푼 폴더를 로드**해야 합니다.
 
@@ -63,13 +65,17 @@ GitHub Release의 파일은 자동으로 설치·업데이트되지 않습니다
 
 ## 사용법
 
-### 강의 한 편 저장하기
+### 영상·자료 저장하기
 
-LearningX에 로그인한 뒤, 주차학습에서 원하는 강의를 펼치고 **다운로드**를 누르세요.
-단일 MP4는 바로 저장하고, 여러 조각으로 된 강의는 뒤에서 자동으로 합칩니다.
+LearningX에 로그인한 뒤, 주차학습에서 원하는 영상이나 자료를 펼치고 **다운로드**를 누르세요.
+PDF·문서·첨부 파일은 원래 파일명과 확장자로 저장합니다. 단일 MP4는 바로 저장하고, 여러 조각으로 된 영상은 뒤에서 자동으로 합칩니다.
+퀴즈·과제·외부 링크 등 다운로드 대상이 아닌 항목에는 버튼을 표시하지 않습니다.
 처리 중 같은 버튼을 다시 누르면 취소할 수 있습니다.
 
-저장 위치는 Chrome 기본 다운로드 폴더 아래 `LearningX/과목/주차/강의명.mp4`입니다.
+저장 위치는 Chrome 기본 다운로드 폴더 아래입니다.
+
+- 영상: `LearningX/과목/주차/강의명.mp4`
+- 자료: `LearningX/과목/주차/원본파일명.확장자`
 
 ### 여러 영상을 한 편으로 만들기
 
@@ -99,6 +105,8 @@ LearningX에 로그인한 뒤, 주차학습에서 원하는 강의를 펼치고 
 
 - **브라우저:** 데스크톱 Chrome 116 이상.
 - **LMS:** 숭실대학교 LearningX / Commons. 다른 대학은 별도 검증이 필요합니다.
+- **다운로드:** LearningX에서 열람이 허용된 Commons 영상, PDF, 파일 자료. 원본 자료가 아닌 로그인·오류 응답은 저장하지 않습니다.
+- **병합 화면:** 영상 전용입니다. PDF·문서·첨부 파일은 LMS 항목 옆 버튼으로 저장하세요.
 - **빠른 병합:** 입력 합계 512 MiB까지. 영상·음성 형식이 같아야 합니다.
 - **호환 모드:** 입력 합계 10분·128 MiB까지. 720p / H.264 / AAC로 변환합니다.
 - **지원하지 않음:** DRM·암호화 영상, HLS/DASH, 다중 영상·음성 트랙, 열람 제한 우회.
@@ -117,8 +125,8 @@ LearningX에 로그인한 뒤, 주차학습에서 원하는 강의를 펼치고 
 ## 개발하기
 
 ```bash
-git clone https://github.com/PeraSite/learningx-video-extension.git
-cd learningx-video-extension
+git clone https://github.com/PeraSite/learningx-downloader.git
+cd learningx-downloader
 bun install --frozen-lockfile
 bun run build
 ```
@@ -127,7 +135,7 @@ bun run build
 테스트, 구조, 기여 방법은 [개발 가이드](docs/DEVELOPMENT.md)에 정리했습니다.
 
 `main`에 푸시하면 Actions가 단위 테스트·빌드·실제 Chromium 통합 테스트를 수행하고,
-검증한 ZIP과 `SHA256SUMS.txt`를 새 [Release](https://github.com/PeraSite/learningx-video-extension/releases/latest)에 올립니다.
+검증한 `learningx-downloader.zip`과 `SHA256SUMS.txt`를 새 [Release](https://github.com/PeraSite/learningx-downloader/releases/latest)에 올립니다.
 
 ## 라이선스와 고지
 

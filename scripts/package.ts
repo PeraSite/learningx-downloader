@@ -3,7 +3,7 @@ const manifest=await Bun.file('manifest.json').json();
 await mkdir('release',{recursive:true});
 await cp('docs','dist/docs',{recursive:true});
 for(const name of ['README.md','THIRD_PARTY_NOTICES.md','TEST_REPORT.md'])try{await cp(name,`dist/${name}`);}catch{}
-const path=`release/learningx-video-extension-${manifest.version}.zip`;
+const path=`release/learningx-downloader-${manifest.version}.zip`;
 await rm(path,{force:true});
 const process=Bun.spawn(['zip','-qr',`../${path}`,'.'],{cwd:'dist',stdout:'inherit',stderr:'inherit'});
 if(await process.exited!==0)throw new Error('ZIP creation failed');

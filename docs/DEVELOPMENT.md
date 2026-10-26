@@ -1,4 +1,4 @@
-# 개발 가이드
+# learningx-downloader 개발 가이드
 
 ## 준비
 
@@ -18,7 +18,7 @@ bun run build
 ```
 
 - `bun run dev`: 웹 미리보기. 로컬 파일 병합을 시험할 수 있습니다. 학교 세션 연동은 확장으로 설치해야 합니다.
-- `bun run build`: `dist/`에 MV3 확장을 만들고 `release/`에 설치 ZIP을 생성합니다.
+- `bun run build`: `dist/`에 MV3 확장을 만들고 `release/learningx-downloader-{버전}.zip`을 생성합니다.
 - 확장 수정 후에는 `chrome://extensions`와 LearningX 탭을 새로고침하세요.
 
 ## 테스트
@@ -47,15 +47,16 @@ bun run test:e2e
 
 ## 구조
 
-- `src/content.ts`: LMS의 강의 감지, 다운로드 버튼, 같은 프레임에서 인증 GET
+- `src/content.ts`: LMS 콘텐츠 타입 감지, 영상·자료 다운로드 버튼, 같은 프레임에서 인증 GET
+- `src/learningx.ts`: Commons 영상·파일·PDF 타입 구분과 열람 권한 검증
 - `src/background.ts`: 확장 메시지와 고급 화면 진입
-- `src/direct.ts`: 원클릭 다운로드 작업과 취소
-- `src/offscreen.ts`: 화면 없는 조각 다운로드·병합
-- `src/commons.ts`: 원본 URL 허용 목록, XML 해석, 조각과 미러 구분
+- `src/direct.ts`: 영상·자료 원클릭 다운로드 작업과 취소
+- `src/offscreen.ts`: 화면 없는 영상 조각 다운로드·병합
+- `src/commons.ts`: 원본 URL 허용 목록, 영상 XML 해석, 자료 원본 다운로드 응답 검증
 - `src/network.ts`: 미디어 검사, 후보 주소 fallback, 수신 바이트 제한
 - `src/merger.ts`: WORKERFS, ffprobe, 빠른 병합, 호환 변환, 접합부 검사
 - `src/history.ts`: 다운로드 기록 직렬화
-- `src/studio.ts`, `src/style.css`: 파일·링크·병합·미리보기 UI
+- `src/studio.ts`, `src/style.css`: 영상 병합 UI와 영상·자료 공통 다운로드 기록
 - `scripts/prepare.ts`, `scripts/build.ts`: 로컬 실행 코드/WASM을 포함한 Bun 빌드
 
 ## 병합 정책

@@ -9,12 +9,12 @@ interface QueueItem { id: string; title: string; lecture?: Lecture; file?: File;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 document.querySelector('#app')!.innerHTML = `
   <main>
-    <header class="topbar"><h1>LearningX 영상 다운로더</h1><div class="header-actions"><button id="open-history" class="help-button" aria-haspopup="dialog" aria-controls="history-dialog">최근 다운로드</button><button id="open-help" class="help-button" aria-haspopup="dialog" aria-controls="help-dialog">사용법</button></div></header>
+    <header class="topbar"><h1>learningx-downloader</h1><div class="header-actions"><button id="open-history" class="help-button" aria-haspopup="dialog" aria-controls="history-dialog">최근 다운로드</button><button id="open-help" class="help-button" aria-haspopup="dialog" aria-controls="help-dialog">사용법</button></div></header>
     <div class="workspace">
       <section class="library" aria-label="영상 목록">
-        <div class="source-tabs"><button id="tab-files" class="source-tab active">파일</button><button id="tab-links" class="source-tab">Commons 링크</button></div>
-        <div id="files-pane" class="import-pane"><label class="dropzone" for="files"><strong>파일 추가</strong><span>MP4, MOV, WebM 등</span><input id="files" type="file" multiple accept="video/*,.mp4,.mov,.webm,.mkv,.ts"></label></div>
-        <div id="links-pane" class="import-pane hidden"><label class="sr-only" for="links">Commons 원본 링크</label><textarea id="links" rows="3" placeholder="https://commons.ssu.ac.kr/em/영상ID"></textarea><div class="input-footer"><button id="add-links" class="button">추가</button></div></div>
+        <div class="source-tabs"><button id="tab-files" class="source-tab active">영상 파일</button><button id="tab-links" class="source-tab">Commons 영상 링크</button></div>
+        <div id="files-pane" class="import-pane"><label class="dropzone" for="files"><strong>영상 추가</strong><span>MP4, MOV, WebM 등</span><input id="files" type="file" multiple accept="video/*,.mp4,.mov,.webm,.mkv,.ts"></label></div>
+        <div id="links-pane" class="import-pane hidden"><label class="sr-only" for="links">Commons 영상 원본 링크</label><textarea id="links" rows="3" placeholder="https://commons.ssu.ac.kr/em/영상ID"></textarea><div class="input-footer"><button id="add-links" class="button">추가</button></div></div>
         <div id="queue-toolbar" class="list-toolbar hidden"><label><input id="select-all" type="checkbox" aria-label="전체 선택"> 전체 선택 <span id="queue-count"></span></label><button id="clear" class="text-button">비우기</button></div>
         <div id="queue" class="queue"></div><p id="empty" class="empty"></p>
       </section>
@@ -33,7 +33,7 @@ document.querySelector('#app')!.innerHTML = `
   <dialog id="help-dialog" aria-labelledby="help-title">
     <div class="dialog-heading"><h2 id="help-title">사용법</h2><button id="close-help" class="dialog-close" aria-label="사용법 닫기" autofocus>×</button></div>
     <div class="dialog-content">
-      <section><h3>LMS에서 바로 저장</h3><p>강의 옆 다운로드 버튼을 누르세요. 조각 영상은 자동으로 합쳐 저장해요. 처리 중 다시 누르면 취소할 수 있어요.</p><p id="source-note" class="context-note"></p><button id="scan" class="text-button">LMS 목록 다시 확인</button></section>
+      <section><h3>LMS에서 바로 저장</h3><p>영상·PDF·첨부 자료 옆 다운로드 버튼을 누르세요. 자료는 원본 파일로 저장하고, 조각 영상은 자동으로 합쳐요. 퀴즈·과제·외부 링크에는 버튼이 표시되지 않아요. 처리 중 다시 누르면 취소할 수 있어요.</p><p id="source-note" class="context-note"></p><button id="scan" class="text-button">LMS 목록 다시 확인</button></section>
       <section><h3>여러 영상 합치기</h3><p>파일이나 Commons 링크를 추가하고, 목록의 화살표로 순서를 바꾼 뒤 합치기를 누르세요.</p><p id="mode-description">원본 유지 모드는 같은 형식끼리 빠르게 합쳐요. 형식이 다르면 호환 모드를 선택해 주세요.</p></section>
       <section><h3>지원 범위</h3><p>입력 합계 512 MiB까지, 호환 모드는 10분·128 MiB까지 지원해요. 이 화면에서 시작한 병합은 탭을 닫으면 중단돼요.</p><p>영상은 이 기기에서 처리해요. 저장이 허용된 콘텐츠만 사용해 주세요.</p></section>
     </div>
@@ -176,8 +176,8 @@ async function start() {
 async function refreshDetected() {
   if(!isExtension)return;
   const state=await chrome.storage.local.get(['sourceTabId','selectedLectureId','history']) as {sourceTabId?:number;selectedLectureId?:string;history?:HistoryEntry[]};sourceTabId=state.sourceTabId;requestedSelection=state.selectedLectureId;history=state.history||[];
-  if(sourceTabId){const key=`lectures:${sourceTabId}`;const data=await chrome.storage.local.get(key);addItems(((data[key]||[]) as Lecture[]).map((lecture:Lecture)=>({id:lecture.id,title:lecture.title,lecture})),false);}
-  $('source-note').textContent=sourceTabId?'LMS 강의 목록이 연결돼 있어요.':'연결된 LMS 탭이 없어요.';
+  if(sourceTabId){const key=`lectures:${sourceTabId}`;const data=await chrome.storage.local.get(key);addItems(((data[key]||[]) as Lecture[]).filter(lecture=>lecture.kind==='video').map((lecture:Lecture)=>({id:lecture.id,title:lecture.title,lecture})),false);}
+  $('source-note').textContent=sourceTabId?'LMS 탭이 연결돼 있어요. 자료는 LMS에서 바로 저장하고, 영상은 이 화면에서 합칠 수도 있어요.':'연결된 LMS 탭이 없어요.';
   renderHistory();
 }
 async function scan() {
@@ -189,7 +189,7 @@ async function scan() {
 }
 function renderHistory() {
   const root=$('history');root.replaceChildren();$('clear-history').classList.toggle('hidden',!history.length);
-  if(!history.length){root.append(element('p','history-empty','아직 다운로드한 영상이 없어요.'));return;}
+  if(!history.length){root.append(element('p','history-empty','아직 다운로드한 파일이 없어요.'));return;}
   for(const h of history) {
     const row=element('div','history-row');row.append(element('strong','',h.title));
     const label=h.state==='complete'?'저장 완료':h.state==='in_progress'?'다운로드 중':`중단: ${h.state}`;row.append(element('span','video-meta',label));

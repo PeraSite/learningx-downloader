@@ -3,6 +3,7 @@ export interface CommonsManifest { contentId: string; title: string; sourceUrl: 
 export interface Lecture {
   id: string; title: string; courseId?: string; courseTitle?: string; week?: string;
   moduleUrl?: string; attendanceItemId?: string; sourceUrl?: string; duration?: number;
+  kind?: 'video' | 'file'; fileName?: string;
   tabId?: number; frameId?: number; documentId?: string; availability?: 'unknown' | 'open' | 'closed';
 }
 export interface ResolvedLecture extends Lecture { sourceUrl: string; parts: MediaPart[] }

@@ -189,3 +189,14 @@ export async function resolveCommons(sourceUrl: string, signal?: AbortSignal): P
   signal?.throwIfAborted();
   return parseCommonsManifest(xml, canonicalSource);
 }
+
+export async function resolveCommonsFile(sourceUrl: string, signal: AbortSignal): Promise<string> {
+  const contentId = normalizeCommonsUrl(sourceUrl).split('/').at(-1)!;
+  const url = `https://${COMMONS_HOST}/index.php?module=xn_media_content2013&act=dispXn_media_content2013DownloadContent&content_id=${encodeURIComponent(contentId)}`;
+  signal.throwIfAborted();
+  const response = await fetch(url, { method:'HEAD', credentials:'include', redirect:'follow', signal });
+  signal.throwIfAborted();
+  if (!response.ok || !isAllowedMediaUrl(response.url)) throw new Error('자료 다운로드 주소를 확인할 수 없습니다.');
+  if (!/^attachment\b/i.test(response.headers.get('content-disposition') || '') || /(?:text\/html|application\/(?:json|xml))/i.test(response.headers.get('content-type') || '')) throw new Error('원본 자료가 아닌 응답입니다. 자료의 다운로드 권한과 로그인을 확인해 주세요.');
+  return url;
+}
